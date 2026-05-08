@@ -19,11 +19,14 @@ VERSION-FILE: FORCE
 -include VERSION-FILE
 
 CFLAGS = -g -O2 -Wall -W -Werror=format-security
-LDFLAGS =
 IPTRAF_CFLAGS := -std=gnu99 -D_GNU_SOURCE
 ALL_CFLAGS = $(CPPFLAGS) $(CFLAGS) $(IPTRAF_CFLAGS)
-ALL_LDFLAGS = $(LDFLAGS)
+ALL_LDFLAGS =
+BASIC_LDFLAGS =
 STRIP ?= strip
+
+prefix = $(HOME)
+sbindir_relative = sbin
 
 prefix = $(HOME)
 sbindir_relative = sbin
@@ -52,7 +55,7 @@ TAR = tar
 # be built by a different compiler. (Note that this is an artifact now
 # but it still might be nice to keep that distinction.)
 BASIC_CFLAGS = -I. -Isrc/
-BASIC_LDFLAGS =
+BASIC_LDFLAGS = -lmaxminddb
 
 # Guard against environment variables
 iptraf-h :=
@@ -144,6 +147,8 @@ iptraf-o += src/wrapper.o
 iptraf-o += src/parse-options.o
 iptraf-o += src/packet.o
 iptraf-o += src/tcptable.o
+iptraf-o += src/geoip.o
+
 iptraf-o += src/othptab.o
 iptraf-o += src/ifstats.o
 iptraf-o += src/detstats.o

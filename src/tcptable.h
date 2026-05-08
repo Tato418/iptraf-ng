@@ -39,8 +39,10 @@ struct tcptableent {
 	int s_fstat;
 	int d_fstat;
 	char smacaddr[18];
-	char s_sname[11];	/* Service names, maxlen=10 */
+	char s_sname[11];
 	char d_sname[11];
+	char s_country[3];
+	char d_country[3];
 	unsigned int protocol;
 	unsigned long pcount;	/* packet count */
 	unsigned long bcount;	/* byte count */

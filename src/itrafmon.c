@@ -28,6 +28,7 @@ itrafmon.c - the IP traffic monitor module
 #include "timer.h"
 #include "ipfrag.h"
 #include "logvars.h"
+#include "geoip.h"
 #include "itrafmon.h"
 #include "sockaddr.h"
 #include "capt.h"
@@ -776,6 +777,8 @@ void ipmon(time_t facilitytime, char *ifptr)
 
 	resolver_init(&res, options.revlook);
 
+	geoip_init("/usr/share/GeoIP/GeoLite2-Country.mmdb");
+
 	if (options.servnames)
 		setservent(1);
 	setprotoent(1);
@@ -934,6 +937,7 @@ void ipmon(time_t facilitytime, char *ifptr)
 		endservent();
 
 	resolver_destroy(&res);
+	geoip_destroy();
 
 	capt_destroy(&capt);
 }

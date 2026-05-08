@@ -1,0 +1,68 @@
+========================================================================
+README DOCUMENT FOR GEOIP COUNTRY CODE DISPLAY
+--------------------------------------------------------------------
+
+DESCRIPTION
+-----------
+
+IPTraf-ng can resolve IP addresses to their country of origin in the TCP
+traffic monitor panel. Country codes (e.g. [US], [DE], [RU]) are displayed
+next to host names in TCP connection entries. This feature uses the
+MaxMind GeoLite2-Country database.
+
+When enabled, the TCP traffic monitor will display IP addresses with their
+country code at the beginning of the line:
+
+    [US] 12.34.56.78:443
+    [DE] 203.0.113.15:22
+    [FR] 198.51.100.5:80
+
+
+REQUIREMENTS
+------------
+
+- libmaxminddb package installed on the system
+- GeoLite2-Country.mmdb database file present
+
+The default database path is:
+
+    /usr/share/GeoIP/GeoLite2-Country.mmdb
+
+The database file is not included with iptraf-ng. It can be downloaded
+free of charge from:
+
+    https://dev.maxmind.com/geoip/geoip2/geolite2/
+
+A free registration is required. Place the downloaded GeoLite2-Country.mmdb
+file at the default path, or install it via your distribution's package
+manager if available (e.g., geoipupdate package).
+
+
+AVAILABILITY
+------------
+
+The GeoIP feature is disabled by default. It must be enabled in the
+Configure menu before starting a traffic monitor session.
+
+If the database file is missing or unreadable, geoip_init() silently fails
+and no country codes are displayed. No crash or error occurs; the traffic
+monitor continues to function normally.
+
+
+ENABLING THE FEATURE
+---------------------
+
+Run iptraf-ng as root, then:
+
+    Configure -> G (Show GeoIP country codes) -> On -> Exit
+
+When enabled, country codes will appear in subsequent TCP traffic monitor
+sessions until the setting is toggled off.
+
+
+DATABASE FORMAT
+---------------
+
+IPTraf-ng uses the MMDB (MaxMind Database) binary format. The older
+GeoIP (dat) format is not supported. Only GeoLite2-Country.mmdb or
+GeoCountry2.mmdb files are compatible.

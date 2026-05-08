@@ -47,6 +47,8 @@ static void makeoptionmenu(struct MENU *menu)
 		   "Toggles display of source MAC addresses in the IP Traffic Monitor");
 	tx_additem(menu, " ^S^how v6-in-v4 traffic as IPv6",
 		   "Toggled display of IPv6 tunnel in IPv4 as IPv6 traffic");
+	tx_additem(menu, " Show ^G^eoIP country codes",
+		   "Toggles display of country codes for IP addresses");
 	tx_additem(menu, NULL, NULL);
 	tx_additem(menu, " ^T^imers...", "Configures timeouts and intervals");
 	tx_additem(menu, NULL, NULL);
@@ -121,6 +123,9 @@ static void indicatesetting(int row, WINDOW *win)
 		break;
 	case 8:
 		printoptonoff(options.v6inv4asv6, win);
+		break;
+	case 9:
+		printoptonoff(options.geoip, win);
 	}
 
 }
@@ -179,17 +184,17 @@ void loadoptions(void)
 static void updatetimes(WINDOW *win)
 {
 	wattrset(win, HIGHATTR);
-	mvwprintw(win, 10, 25, "%3ld mins", options.timeout);
-	mvwprintw(win, 11, 25, "%3ld mins", options.logspan / 60);
-	mvwprintw(win, 12, 25, "%3ld secs", options.updrate);
-	mvwprintw(win, 13, 25, "%3ld mins", options.closedint);
+	mvwprintw(win, 12, 25, "%3ld mins", options.timeout);
+	mvwprintw(win, 13, 25, "%3ld mins", options.logspan / 60);
+	mvwprintw(win, 14, 25, "%3ld secs", options.updrate);
+	mvwprintw(win, 15, 25, "%3ld mins", options.closedint);
 }
 
 static void showoptions(WINDOW *win)
 {
 	int i;
 
-	for (i = 1; i <= 8; i++)
+	for (i = 1; i <= 9; i++)
 		indicatesetting(i, win);
 
 	updatetimes(win);
@@ -263,13 +268,13 @@ void setoptions(void)
 
 	makeoptionmenu(&menu);
 
-	statwin = newwin(15, 35, (LINES - 19) / 2 - 1, (COLS - 40) / 16 + 40);
+	statwin = newwin(17, 35, (LINES - 19) / 2 - 1, (COLS - 40) / 16 + 40);
 	statpanel = new_panel(statwin);
 
 	wattrset(statwin, BOXATTR);
 	tx_colorwin(statwin);
 	tx_box(statwin, ACS_VLINE, ACS_HLINE);
-	wmove(statwin, 9, 1);
+	wmove(statwin, 10, 1);
 	whline(statwin, ACS_HLINE, 33);
 	mvwprintw(statwin, 0, 1, " Current Settings ");
 	wattrset(statwin, STDATTR);
@@ -281,10 +286,11 @@ void setoptions(void)
 	mvwprintw(statwin, 6, 2, "Activity mode:");
 	mvwprintw(statwin, 7, 2, "MAC addresses:");
 	mvwprintw(statwin, 8, 2, "v6-in-v4 as IPv6:");
-	mvwprintw(statwin, 10, 2, "TCP timeout:");
-	mvwprintw(statwin, 11, 2, "Log interval:");
-	mvwprintw(statwin, 12, 2, "Update interval:");
-	mvwprintw(statwin, 13, 2, "Closed/idle persist:");
+	mvwprintw(statwin, 9, 2, "GeoIP:");
+	mvwprintw(statwin, 12, 2, "TCP timeout:");
+	mvwprintw(statwin, 13, 2, "Log interval:");
+	mvwprintw(statwin, 14, 2, "Update interval:");
+	mvwprintw(statwin, 15, 2, "Closed/idle persist:");
 	showoptions(statwin);
 
 	do {
@@ -315,6 +321,9 @@ void setoptions(void)
 			break;
 		case 8:
 			options.v6inv4asv6 = ~options.v6inv4asv6;
+			break;
+		case 9:
+			options.geoip = ~options.geoip;
 			break;
 		case 10:
 			maketimermenu(&timermenu);
@@ -376,7 +385,7 @@ void setoptions(void)
 		}
 
 		indicatesetting(row, statwin);
-	} while (row != 18);
+	} while (row != 19);
 
 	destroyporttab(&ports);
 	tx_destroymenu(&menu);

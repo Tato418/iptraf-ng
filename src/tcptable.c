@@ -21,6 +21,7 @@ tcptable.c - table manipulation routines for the IP monitor
 #include "servname.h"
 #include "hostmon.h"
 #include "sockaddr.h"
+#include "geoip.h"
 
 #define MSGSTRING_MAX	320
 
@@ -375,6 +376,11 @@ struct tcptableent *addentry(struct tcptable *table,
 	memset(new_entry->smacaddr, 0, sizeof(new_entry->smacaddr));
 	memset(new_entry->oth_connection->smacaddr, 0, sizeof(new_entry->oth_connection->smacaddr));
 
+	new_entry->s_country[0] = '\0';
+	new_entry->d_country[0] = '\0';
+	new_entry->oth_connection->s_country[0] = '\0';
+	new_entry->oth_connection->d_country[0] = '\0';
+
 	new_entry->stat = new_entry->oth_connection->stat = 0;
 
 	new_entry->s_fstat = NOTRESOLVED;
@@ -392,6 +398,15 @@ struct tcptableent *addentry(struct tcptable *table,
 	strcpy(new_entry->oth_connection->s_fqdn, new_entry->d_fqdn);
 	new_entry->oth_connection->s_fstat = new_entry->d_fstat;
 	new_entry->oth_connection->d_fstat = new_entry->s_fstat;
+
+if (geoip_is_available()) {
+			if (options.geoip) {
+				geoip_get_country_code(&new_entry->saddr, new_entry->s_country, sizeof(new_entry->s_country));
+				geoip_get_country_code(&new_entry->daddr, new_entry->d_country, sizeof(new_entry->d_country));
+				strcpy(new_entry->oth_connection->d_country, new_entry->s_country);
+				strcpy(new_entry->oth_connection->s_country, new_entry->d_country);
+			}
+		}
 
 	if (new_entry->index < new_entry->oth_connection->index) {
 		new_entry->half_bracket = ACS_ULCORNER;
@@ -792,11 +807,16 @@ void printentry(struct tcptable *table, struct tcptableent *tableentry)
 
 	/* proceed with the actual entry */
 	wattrset(table->tcpscreen, normalattr);
+	char country_buf[8] = "";
+	if (options.geoip && tableentry->s_country[0] != '\0')
+		snprintf(country_buf, sizeof(country_buf), "[%.2s] ", tableentry->s_country);
+
 	mvwprintw(table->tcpscreen,
 		  target_row, 1,
-		  "%.*s:%.*s",
+		  "%s%.*s:%*.*s",
+		  country_buf,
 		  32 * COLS / 80, tableentry->s_fqdn,
-		  10, tableentry->s_sname);
+		  10, 10, tableentry->s_sname);
 
 	wattrset(table->tcpscreen, highattr);
 
